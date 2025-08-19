@@ -27,6 +27,12 @@ jobs:
       - name: Test with ESLint
         run: npm run lint
 
+      # Compute lowercase owner and export to environment for later use
+      - name: Compute lowercased repository owner
+        run: |
+          # Use the github.repository_owner context and force lowercase using tr
+          echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -39,7 +45,6 @@ jobs:
         with:
           context: .
           push: true
-          # newlines -> multiple tags; ensure repository owner is lowercased
           tags: |
-            ghcr.io/${{ toLower(github.repository_owner) }}/nodejs-cilab:${{ github.sha }}
-            ghcr.io/${{ toLower(github.repository_owner) }}/nodejs-cilab:latest
+            ghcr.io/${{ env.OWNER }}/nodejs-cilab:${{ github.sha }}
+            ghcr.io/${{ env.OWNER }}/nodejs-cilab:latest
